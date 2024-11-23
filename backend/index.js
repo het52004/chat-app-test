@@ -31,10 +31,6 @@ app.use("/api/user", userOperation);
 app.use("/api/currentUser", currentUser);
 app.use("/api/message", messages);
 
-app.get("/", (req, res) => {
-  res.send("Server is active");
-});
-
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
