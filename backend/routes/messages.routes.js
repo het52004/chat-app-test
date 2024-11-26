@@ -1,16 +1,17 @@
 import { Router } from "express";
 import protectedRoute from "../middlewares/protectedRoute.js";
-import { getMessages, sendMessage } from "../controllers/message.controller.js";
+import {
+  getMessages,
+  getUsersForSidebar,
+  sendMessage,
+} from "../controllers/message.controller.js";
 import verifyChat from "../middlewares/verifyChat.js";
 
 const router = Router();
 
-router.post("/sendMessage", protectedRoute, verifyChat, sendMessage);
-router.get(
-  "/getMessages/:receiverId/:receiverName",
-  protectedRoute,
-  verifyChat,
-  getMessages
-);
+router.post("/sendMessage", protectedRoute, sendMessage);
+router.get("/getMessages/:receiverId", protectedRoute, getMessages);
+
+router.get("/users", protectedRoute, getUsersForSidebar);
 
 export default router;
