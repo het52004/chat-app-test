@@ -1,39 +1,44 @@
-import { useState } from "react";
-import "./App.css";
-import { axiosInstance } from "./lib/axios";
+import { Toaster } from "react-hot-toast";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/Login";
+import Home from "./pages/Home";
+import Signup from "./pages/Signup";
+import { useAuthStore } from "./store/useAuthStore";
+import { useEffect } from "react";
 
 function App() {
-  const [uniqueName, setUname] = useState();
-  const [password, setPassword] = useState();
-  async function handleSubmit() {
-    const res = await axiosInstance.post("/api/auth/login", {
-      uniqueName,
-      password,
-    });
-    console.log(res);
+  const { userData, checkAuth, isCheckingAuth } = useAuthStore();
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+  if (isCheckingAuth && !userData) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div
+          className="spinner-border"
+          style={{ width: "5rem", height: "5rem" }}
+          role="status"
+        >
+          <span className="sr-only"></span>
+        </div>
+      </div>
+    );
   }
   return (
-    <>
-      <input
-        type="text"
-        name=""
-        id=""
-        placeholder="uname"
-        onChange={(e) => setUname(e.target.value)}
-      />
-      <br />
-      <br />
-      <input
-        type="text"
-        name=""
-        id=""
-        placeholder="password"
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <br />
-      <br />
-      <button onClick={handleSubmit}>submit</button>
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/"
+          element={!userData ? <Login /> : <Navigate to="/home" />}
+        />
+        <Route
+          path="/home"
+          element={userData ? <Home /> : <Navigate to="/" />}
+        />
+        <Route path="/signup" element={<Signup />} />
+      </Routes>
+      <Toaster />
+    </BrowserRouter>
   );
 }
 

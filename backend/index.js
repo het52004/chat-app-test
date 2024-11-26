@@ -8,10 +8,9 @@ import userOperation from "./routes/userOperation.routes.js";
 import currentUser from "./routes/currentUser.routes.js";
 import messages from "./routes/messages.routes.js";
 import cookieParser from "cookie-parser";
+import { app, server } from "./lib/socket.js";
 
 dotenv.config();
-
-const app = express();
 
 const port = process.env.PORT;
 
@@ -39,7 +38,7 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`server running on port ${port}`);
   connectDb();
 });

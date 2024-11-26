@@ -80,8 +80,6 @@ export const login = async (req, res) => {
           });
         }
       } catch (error) {
-        console.log(error);
-
         return res.json({
           success: false,
           message: "An error occured during decrypting the password!",
@@ -99,4 +97,16 @@ export const login = async (req, res) => {
 export const logout = (req, res) => {
   res.clearCookie("jwt");
   return res.json({ success: true, message: "Logged out successfully" });
+};
+
+export const checkAuth = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.json({ sucess: false, message: "user not found!" });
+    }
+    res.status(200).json({ success: true, userData: user });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
 };

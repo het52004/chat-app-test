@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 const protectedRoute = async (req, res, next) => {
-  const token = req.headers["access-token"];
+  const token = req.cookies.jwt;
   if (!token) {
     return res.json({
       success: false,
