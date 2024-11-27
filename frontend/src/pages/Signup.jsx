@@ -8,10 +8,10 @@ function Signup() {
   const [uniqueName, setUniquename] = useState();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
-  const { singup, isSigningUp } = useAuthStore();
+  const { signup, isSigningUp } = useAuthStore();
   function handleSubmit(e) {
     e.preventDefault();
-    singup({ userName, uniqueName, password, email });
+    signup({ userName, uniqueName, password, email });
   }
   return (
     <div className="signupContainer d-flex justify-content-center align-items-center">

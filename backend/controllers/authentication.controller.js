@@ -32,7 +32,6 @@ export const signup = async (req, res) => {
           success: true,
           message: "User has been registered successfully!",
           userData: createdUser,
-          accessToken: token,
         });
       } else {
         res.json({ success: false, message: "Failed to create a new user!" });
@@ -76,7 +75,6 @@ export const login = async (req, res) => {
             success: true,
             message: "User has been logged in successfully!",
             userData: user,
-            accessToken: token,
           });
         }
       } catch (error) {
