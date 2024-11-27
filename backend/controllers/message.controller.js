@@ -21,7 +21,11 @@ export const sendMessage = async (req, res) => {
       if (receiverSocketId) {
         io.to(receiverSocketId).emit("newMessage", messageRes);
       }
-      res.json({ success: true, message: "Message sent successfully!" });
+      res.json({
+        success: true,
+        message: "Message sent successfully!",
+        message: messageRes,
+      });
     }
   } catch (error) {
     return res.json({
@@ -42,18 +46,6 @@ export const getMessages = async (req, res) => {
         { senderId: receiverId, receiverId: senderId },
       ],
     });
-    // if (messages.length === 0) {
-    //   res.json({
-    //     success: true,
-    //     message: `This is the beginning of your conversation with ${receiverName}`,
-    //   });
-    // } else {
-    //   res.json({
-    //     success: true,
-    //     message: `Messages with ${receiverName} feteched successfully`,
-    //     fetchedMessages: messages,
-    //   });
-    // }
     res.json({ success: true, message: "Messages found", messages: messages });
   } catch (error) {
     return res.json({

@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import "./css/Signup.css";
 import { useDispatch, useSelector } from "react-redux";
+import { useAuthStore } from "../store/useAuthStore";
 
 function Signup() {
   const [userName, setUsername] = useState();
   const [uniqueName, setUniquename] = useState();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
-  const { loading } = useSelector((state) => state.user);
-  const dispatch = useDispatch();
+  const { singup, isSigningUp } = useAuthStore();
   function handleSubmit(e) {
     e.preventDefault();
+    singup({ userName, uniqueName, password, email });
   }
   return (
     <div className="signupContainer d-flex justify-content-center align-items-center">
@@ -51,18 +52,18 @@ function Signup() {
           </div>
           <button
             type="button"
-            disabled={loading}
+            disabled={isSigningUp}
             className="btn signupButton w-100"
             id="signupBtn"
             onClick={handleSubmit}
             style={{
-              background: loading && "transparent",
-              color: loading && "#6a11cb",
-              borderColor: loading && "#6a11cb",
-              cursor: loading && "not-allowed",
+              background: isSigningUp && "transparent",
+              color: isSigningUp && "#6a11cb",
+              borderColor: isSigningUp && "#6a11cb",
+              cursor: isSigningUp && "not-allowed",
             }}
           >
-            {loading ? (
+            {isSigningUp ? (
               <span
                 className="spinner-border spinner-border-sm"
                 role="status"

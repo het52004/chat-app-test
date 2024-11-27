@@ -4,7 +4,11 @@ import daisyui from "daisyui";
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      screens: {
+        xs: "550px", // Custom breakpoint for screens >= 550px
+      },
+    },
   },
   plugins: [daisyui],
   daisyui: {

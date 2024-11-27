@@ -34,44 +34,62 @@ export const useAuthStore = create((set, get) => ({
   },
 
   signup: async ({ userName, uniqueName, email, password }) => {
-    set({ isSigningUp: true });
-    try {
-      const res = await axiosInstance.post("/api/auth/signup", {
-        userName,
-        uniqueName,
-        email,
-        password,
-      });
-      if (res.data.success) {
-        set({ userData: res.data.userData });
-        get().connectSocket();
-      } else {
-        toast.error(res.data.message);
+    if (!userName || !uniqueName || !email || !password) {
+      toast.error(
+        "You must fill all the fields in order to create an account!"
+      );
+    } else if (userName.length < 3 || userName.length > 10) {
+      toast.error(
+        "Username must be longer than 2 characters and shorter than 10 characters!"
+      );
+    } else if (uniqueName.length < 3 || uniqueName.length > 10) {
+      toast.error(
+        "Uniquename must be longer than 2 characters and shorter than 10 characters!"
+      );
+    } else {
+      set({ isSigningUp: true });
+      try {
+        const res = await axiosInstance.post("/api/auth/signup", {
+          userName,
+          uniqueName,
+          email,
+          password,
+        });
+        if (res.data.success) {
+          set({ userData: res.data.userData });
+          get().connectSocket();
+        } else {
+          toast.error(res.data.message);
+        }
+      } catch (error) {
+        toast.error(error.response.data.message);
+      } finally {
+        set({ isSigningUp: false });
       }
-    } catch (error) {
-      toast.error(error.response.data.message);
-    } finally {
-      set({ isSigningUp: false });
     }
   },
 
   login: async ({ uniqueName, password }) => {
-    set({ isLoggingIn: true });
-    try {
-      const res = await axiosInstance.post("/api/auth/login", {
-        uniqueName,
-        password,
-      });
-      if (res.data.success) {
-        set({ userData: res.data.userData });
-        get().connectSocket();
-      } else {
-        toast.error(res.data.message);
+    if (!uniqueName || !password) {
+      toast.error("You must fill all the fields in order to proceed");
+    } else {
+      set({ isLoggingIn: true });
+      try {
+        const res = await axiosInstance.post("/api/auth/login", {
+          uniqueName,
+          password,
+        });
+        if (res.data.success) {
+          set({ userData: res.data.userData });
+          get().connectSocket();
+        } else {
+          toast.error(res.data.message);
+        }
+      } catch (error) {
+        toast.error(error.message);
+      } finally {
+        set({ isLoggingIn: false });
       }
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      set({ isLoggingIn: false });
     }
   },
 

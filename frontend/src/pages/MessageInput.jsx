@@ -11,8 +11,12 @@ const MessageInput = () => {
   const handleSendMessage = async (e) => {
     e.preventDefault();
     try {
-      await sendMessage(text);
-      setText("");
+      if (!text || text.length < 1) {
+        toast.error("Message cannot be blank");
+      } else {
+        await sendMessage(text);
+        setText("");
+      }
     } catch (error) {
       toast.error(error.message);
     }
