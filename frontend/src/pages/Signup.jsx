@@ -1,83 +1,164 @@
 import React, { useState } from "react";
 import "./css/Signup.css";
-import { useDispatch, useSelector } from "react-redux";
 import { useAuthStore } from "../store/useAuthStore";
+import { schema } from "../lib/zodCongfig";
+import { Eye, EyeClosed } from "lucide-react";
+import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 function Signup() {
   const [userName, setUsername] = useState();
   const [uniqueName, setUniquename] = useState();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
-  const { signup, isSigningUp } = useAuthStore();
+  const [showPassword, setShowPassword] = useState(false);
+  const [otp, setOtp] = useState();
+  const { signup, isSigningUp, verifyOtp } = useAuthStore();
+  const em = localStorage.getItem("email");
   function handleSubmit(e) {
     e.preventDefault();
-    signup({ userName, uniqueName, password, email });
+    const data = { userName, uniqueName, email, password };
+    const result = schema.safeParse(data);
+    if (!result.success) {
+      result.error.errors.forEach((err) => {
+        toast.error(err.message);
+      });
+    } else {
+      signup({ userName, uniqueName, password, email });
+    }
   }
   return (
-    <div className="signupContainer d-flex justify-content-center align-items-center">
-      <div className="signupBox p-5 shadow-lg">
-        <h3 className="signupTitle text-center mb-4">Create Account</h3>
-        <form>
-          <div className="mb-3">
+    <div className="flex items-center justify-center h-screen">
+      {!em ? (
+        <form className="mt-5 max-w-md w-[700px] xs:w-50 mx-auto p-5 border-3 border-primary border-500 rounded-lg">
+          <div className="relative z-0 w-full mb-5 group">
             <input
               type="text"
-              className="form-control signupInput"
-              placeholder="Username"
+              name="floating_first_name"
+              id="floating_first_name"
+              className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+              placeholder=" "
               onChange={(e) => setUsername(e.target.value)}
             />
+            <label
+              htmlFor="floating_first_name"
+              className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+            >
+              UserName
+            </label>
           </div>
-          <div className="mb-3">
+          <div className="relative z-0 w-full mb-5 group">
             <input
               type="text"
-              className="form-control signupInput"
-              placeholder="Unique Name"
+              name="floating_first_name"
+              id="floating_first_name"
+              className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+              placeholder=" "
               onChange={(e) => setUniquename(e.target.value)}
             />
+            <label
+              htmlFor="floating_first_name"
+              className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+            >
+              UniqueName
+            </label>
           </div>
-          <div className="mb-3">
+          <div className="relative z-0 w-full mb-5 group">
             <input
               type="text"
-              className="form-control signupInput"
-              placeholder="Email"
+              name="floating_first_name"
+              id="floating_first_name"
+              className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+              placeholder=" "
               onChange={(e) => setEmail(e.target.value)}
             />
+            <label
+              htmlFor="floating_first_name"
+              className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+            >
+              Email
+            </label>
           </div>
-          <div className="mb-3">
+          <div className="relative z-0 flex items-center w-full mb-5 group">
             <input
-              type="password"
-              className="form-control signupInput"
-              placeholder="Password"
+              type={showPassword ? "text" : "password"}
+              name="floating_password"
+              id="floating_password"
+              className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+              placeholder=" "
               onChange={(e) => setPassword(e.target.value)}
             />
-          </div>
-          <button
-            type="button"
-            disabled={isSigningUp}
-            className="btn signupButton w-100"
-            id="signupBtn"
-            onClick={handleSubmit}
-            style={{
-              background: isSigningUp && "transparent",
-              color: isSigningUp && "#6a11cb",
-              borderColor: isSigningUp && "#6a11cb",
-              cursor: isSigningUp && "not-allowed",
-            }}
-          >
-            {isSigningUp ? (
-              <span
-                className="spinner-border spinner-border-sm"
-                role="status"
-                aria-hidden="true"
-              ></span>
+            {!showPassword ? (
+              <EyeClosed
+                className="cursor-pointer"
+                onClick={() => setShowPassword(true)}
+              />
             ) : (
-              "Signup"
+              <Eye
+                className="cursor-pointer"
+                onClick={() => setShowPassword(false)}
+              />
             )}
-          </button>
+            <label
+              htmlFor="floating_password"
+              className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+            >
+              Password
+            </label>
+          </div>
+          <div className="flex items-center mb-4">
+            {!isSigningUp ? (
+              <button
+                type="submit"
+                className="btn btn-primary"
+                onClick={handleSubmit}
+              >
+                Submit
+              </button>
+            ) : (
+              <span className="loading loading-dots loading-lg"></span>
+            )}
+          </div>
+          Already a user?
+          <Link className="link link-primary link-hover ml-2" to="/">
+            Login
+          </Link>
         </form>
-        <p className="signupLink text-center mt-4">
-          Already have an account? <a href="/">Log in</a>
-        </p>
-      </div>
+      ) : (
+        <div>
+          <label className="input input-bordered flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              className="h-4 w-4 opacity-70"
+            >
+              <path
+                fillRule="evenodd"
+                d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <input
+              type="text"
+              className="grow"
+              placeholder="Enter your OTP"
+              onChange={(e) => setOtp(e.target.value)}
+            />
+          </label>
+          {!isSigningUp ? (
+            <button
+              type="submit"
+              className="btn btn-primary h-[10px] w-[90px] mt-3"
+              onClick={() => verifyOtp(otp)}
+            >
+              Submit
+            </button>
+          ) : (
+            <span className="loading loading-dots loading-lg mt-3"></span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

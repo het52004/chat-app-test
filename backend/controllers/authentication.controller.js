@@ -1,10 +1,21 @@
 import User from "../models/user.model.js";
 import { generateToken } from "../helpers/generateToken.js";
 import bcrypt from "bcryptjs";
+import { sendEmail } from "../helpers/emailUtils.js";
+import TempUser from "../models/tempUser.model.js";
 
-export const signup = async (req, res) => {
+const generateOTP = () =>
+  Math.floor(100000 + Math.random() * 900000).toString();
+
+export const verifyUser = async (req, res) => {
+  const { userName, uniqueName, email, password } = req.body;
+  if (!userName || !uniqueName || !email || !password) {
+    return res.json({
+      success: false,
+      message: "Please fill all the details!",
+    });
+  }
   try {
-    const { userName, uniqueName, email, password } = req.body;
     const existingUser = await User.findOne({ email });
     const uniqueNameExists = await User.findOne({ uniqueName });
     if (uniqueNameExists) {
@@ -18,24 +29,70 @@ export const signup = async (req, res) => {
         message: "A user with this email address already exists!",
       });
     } else {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const createdUser = await User.create({
+      const existingTempUser = await TempUser.findOne({ email });
+      if (existingTempUser) {
+        res.json({
+          success: false,
+          message: `We have already send you OTP on your email ${email} please recheck`,
+        });
+      }
+      const otp = generateOTP();
+      await sendEmail(userName, email, otp, res);
+      const newUser = TempUser.create({
         userName,
         uniqueName,
         email,
-        password: hashedPassword,
+        password,
+        otp,
       });
-      // await createdUser.save();
-      if (createdUser) {
-        const token = generateToken(createdUser, res);
-        res.json({
-          success: true,
-          message: "User has been registered successfully!",
-          userData: createdUser,
+      if (!newUser) {
+        return res.json({
+          success: false,
+          message: "Failed to signup please try again!",
         });
-      } else {
-        res.json({ success: false, message: "Failed to create a new user!" });
       }
+      res.json({
+        success: true,
+        message: `An OTP has been sent to ${email}`,
+        email,
+      });
+    }
+  } catch (error) {
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const signup = async (req, res) => {
+  const { email, otp } = req.body;
+  if (!email) {
+    res.json({ success: false, message: "Email not verified!" });
+  }
+  try {
+    const temp = await TempUser.findOne({ email });
+    if (!temp)
+      return res.json({ success: false, message: "OTP expired or invalid" });
+    if (temp.otp !== otp)
+      return res.json({ success: false, message: "Invalid OTP!" });
+    const hashedPassword = await bcrypt.hash(temp.password, 10);
+    const createdUser = await User.create({
+      userName: temp.userName,
+      uniqueName: temp.uniqueName,
+      email: temp.email,
+      password: hashedPassword,
+    });
+    await temp.deleteOne({ email });
+    if (createdUser) {
+      generateToken(createdUser, res);
+      res.json({
+        success: true,
+        message: "User has been registered successfully!",
+        userData: createdUser,
+      });
+    } else {
+      res.json({ success: false, message: "Failed to create a new user!" });
     }
   } catch (error) {
     if (error.name === "ValidationError") {
@@ -54,6 +111,12 @@ export const signup = async (req, res) => {
 
 export const login = async (req, res) => {
   const { uniqueName, password } = req.body;
+  if (!uniqueName || !password) {
+    return res.json({
+      success: false,
+      message: "Please fill all the details!",
+    });
+  }
   try {
     const user = await User.findOne({ uniqueName });
     if (!user) {

@@ -53,7 +53,7 @@ const ChatContainer = () => {
   return (
     <div
       className={`flex-1 flex flex-col overflow-auto ${
-        selectedUser ? "block" : "hidden"
+        selectedUser ? "flex" : "hidden"
       } xs:${selectedUser && "flex"}`}
     >
       <ChatHeader />

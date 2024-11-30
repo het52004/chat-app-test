@@ -1,6 +1,8 @@
 import { THEMES } from "../constants";
+import { useAuthStore } from "../store/useAuthStore";
 import { useThemeStore } from "../store/useThemeStore";
 import { Send } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const PREVIEW_MESSAGES = [
   { id: 1, content: "Hey! How's it going?", isSent: false },
@@ -13,17 +15,26 @@ const PREVIEW_MESSAGES = [
 
 const Settings = () => {
   const { theme, setTheme } = useThemeStore();
+  const { userData } = useAuthStore();
 
   return (
     <div className="h-screen container mx-auto px-4 pt-20 max-w-5xl">
       <div className="space-y-6">
         <div className="flex flex-col gap-1">
           <h2 className="text-lg font-semibold">Theme</h2>
+          <div className="flex justify-end">
+            <span className="text-sm font-semibold sm:text-lg">
+              {userData ? (
+                <Link to="/home">Go back to home</Link>
+              ) : (
+                <Link to="/">Go back to Login</Link>
+              )}
+            </span>
+          </div>
           <p className="text-sm text-base-content/70">
             Choose a theme for your chat interface
           </p>
         </div>
-
         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
           {THEMES.map((t) => (
             <button

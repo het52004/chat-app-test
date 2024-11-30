@@ -22,7 +22,10 @@ const Sidebar = () => {
   if (isUsersLoading) return <SidebarSkeleton />;
   return (
     <aside
-      className={`h-full w-full xs:w-[35%] sm:w-[40%] md:w-[40%] lg:w-[30%] border-r border-base-300 flex flex-col transition-all duration-200 ${selectedUser ? "hidden" : "block"} xs:block`}>
+      className={`h-full w-full xs:w-[35%] sm:w-[40%] md:w-[40%] lg:w-[30%] border-r border-base-300 flex flex-col transition-all duration-200 ${
+        selectedUser ? "hidden" : "flex"
+      } xs:flex`}
+    >
       <div className="border-b border-base-300 w-full p-1 flex flex-col items-center justify-center">
         <div className="flex items-center gap-2">
           <Users className="size-6" />
@@ -44,7 +47,7 @@ const Sidebar = () => {
         </div>
       </div>
 
-      <div className="overflow-y-auto w-full py-3">
+      <div className="overflow-y-auto h-full w-full py-3">
         {filteredUsers.map((user) => (
           <button
             key={user._id}
@@ -55,6 +58,12 @@ const Sidebar = () => {
                 : ""
             }`}
           >
+            <div className="text-left">
+              <div className="font-medium truncate">{user.uniqueName}</div>
+              <div className="text-sm text-zinc-400">
+                {onlineUsers.includes(user._id) ? "Online" : "Offline"}
+              </div>
+            </div>
             <div className="relative mx-auto">
               {onlineUsers.includes(user._id) && (
                 <span
@@ -62,12 +71,6 @@ const Sidebar = () => {
               rounded-full ring-2 ring-zinc-900"
                 />
               )}
-            </div>
-            <div className="text-left">
-              <div className="font-medium truncate">{user.userName}</div>
-              <div className="text-sm text-zinc-400">
-                {onlineUsers.includes(user._id) ? "Online" : "Offline"}
-              </div>
             </div>
           </button>
         ))}

@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 const MessageInput = () => {
   const [text, setText] = useState("");
 
-  const { sendMessage } = useChatStore();
+  const { sendMessage, isSendingMessage } = useChatStore();
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -43,9 +43,13 @@ const MessageInput = () => {
             <Image size={20} />
           </button> */}
         </div>
-        <button type="submit" className="btn btn-sm btn-circle">
-          <Send size={22} />
-        </button>
+        {!isSendingMessage ? (
+          <button type="submit" className="btn btn-primary btn-sm btn-circle">
+            <Send size={22} />
+          </button>
+        ) : (
+          <span className="loading loading-spinner loading-md"></span>
+        )}
       </form>
     </div>
   );

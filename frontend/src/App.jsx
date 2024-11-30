@@ -33,7 +33,7 @@ function App() {
     );
   }
   return (
-    <div data-theme={theme}>
+    <div data-theme={theme} className="h-screen">
       <Navbar />
       <Routes>
         <Route
