@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { privateRoutes } from "./lib/privateRoutes";
 import Navbar from "./pages/Navbar";
 import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
 
 function App() {
   const { userData, checkAuth, isCheckingAuth } = useAuthStore();
@@ -49,6 +50,10 @@ function App() {
           element={!userData ? <Signup /> : <Navigate to="/home" />}
         />
         <Route path="/settings" element={<Settings />} />
+        <Route
+          path="/profile"
+          element={userData ? <Profile /> : <Navigate to="/" />}
+        />
       </Routes>
       <Toaster />
     </div>

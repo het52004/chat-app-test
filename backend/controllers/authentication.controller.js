@@ -7,6 +7,8 @@ import TempUser from "../models/tempUser.model.js";
 const generateOTP = () =>
   Math.floor(100000 + Math.random() * 900000).toString();
 
+export const checkSentOtp = async () => {};
+
 export const verifyUser = async (req, res) => {
   const { userName, uniqueName, email, password } = req.body;
   if (!userName || !uniqueName || !email || !password) {

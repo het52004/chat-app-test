@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./css/Signup.css";
 import { useAuthStore } from "../store/useAuthStore";
 import { schema } from "../lib/zodCongfig";
@@ -13,8 +13,9 @@ function Signup() {
   const [password, setPassword] = useState();
   const [showPassword, setShowPassword] = useState(false);
   const [otp, setOtp] = useState();
-  const { signup, isSigningUp, verifyOtp } = useAuthStore();
-  const em = localStorage.getItem("email");
+  const { signup, isSigningUp, verifyOtp, showOtpInput, setShowOtpInput } =
+    useAuthStore();
+
   function handleSubmit(e) {
     e.preventDefault();
     const data = { userName, uniqueName, email, password };
@@ -29,7 +30,7 @@ function Signup() {
   }
   return (
     <div className="flex items-center justify-center h-screen">
-      {!em ? (
+      {!showOtpInput ? (
         <form className="mt-5 max-w-md w-[700px] xs:w-50 mx-auto p-5 border-3 border-primary border-500 rounded-lg">
           <div className="relative z-0 w-full mb-5 group">
             <input
@@ -106,7 +107,7 @@ function Signup() {
               Password
             </label>
           </div>
-          <div className="flex items-center mb-4">
+          <div className="flex items-center justify-between mb-4">
             {!isSigningUp ? (
               <button
                 type="submit"
@@ -118,6 +119,12 @@ function Signup() {
             ) : (
               <span className="loading loading-dots loading-lg"></span>
             )}
+            <button
+              className="link link-primary"
+              onClick={() => setShowOtpInput(true)}
+            >
+              Already have OTP?
+            </button>
           </div>
           Already a user?
           <Link className="link link-primary link-hover ml-2" to="/">
@@ -146,17 +153,25 @@ function Signup() {
               onChange={(e) => setOtp(e.target.value)}
             />
           </label>
-          {!isSigningUp ? (
+          <div className="flex flex-col items-center">
             <button
-              type="submit"
-              className="btn btn-primary h-[10px] w-[90px] mt-3"
-              onClick={() => verifyOtp(otp)}
+              className="link link-primary mt-3 mb-3"
+              onClick={() => setShowOtpInput(false)}
             >
-              Submit
+              Back to signup
             </button>
-          ) : (
-            <span className="loading loading-dots loading-lg mt-3"></span>
-          )}
+            {!isSigningUp ? (
+              <button
+                type="submit"
+                className="btn btn-primary h-[9px] w-[130px] mt-3"
+                onClick={() => verifyOtp(otp)}
+              >
+                Submit OTP
+              </button>
+            ) : (
+              <span className="loading loading-dots loading-lg mt-3"></span>
+            )}
+          </div>
         </div>
       )}
     </div>

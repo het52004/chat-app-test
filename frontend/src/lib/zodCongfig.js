@@ -18,9 +18,14 @@ export const schema = z.object({
     .min(1, "Password cannot be empty")
     .min(3, "Password must be at least 3 characters long")
     .max(10, "Password must not be more than 10 characters long"),
-  email: z.string({
-    required_error: "Email cannot be empty",
-  }),
+  email: z
+    .string({
+      required_error: "Email cannot be empty",
+    })
+    .email("Invalid email address")
+    .refine((email) => email.endsWith("@gmail.com"), {
+      message: "Email must be a @gmail.com address",
+    }),
   userName: z
     .string({
       required_error: "User name cannot be empty",

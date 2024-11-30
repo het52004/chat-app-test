@@ -14,6 +14,7 @@ export const useAuthStore = create((set, get) => ({
   isCheckingAuth: false,
   onlineUsers: [],
   socket: null,
+  showOtpInput: false,
 
   checkAuth: async () => {
     set({ isCheckingAuth: true });
@@ -44,6 +45,7 @@ export const useAuthStore = create((set, get) => ({
       });
       if (res.data.success) {
         localStorage.setItem("email", res.data.email);
+        set({ showOtpInput: true });
         toast.success(res.data.message);
       } else {
         toast.error(res.data.message);
@@ -103,6 +105,7 @@ export const useAuthStore = create((set, get) => ({
   logout: async () => {
     try {
       const res = await axiosInstance.get("/api/auth/logout");
+      localStorage.removeItem("email");
       set({ userData: null });
       toast.success(res.data.message);
       get().disconnectSocket();
@@ -128,5 +131,8 @@ export const useAuthStore = create((set, get) => ({
   },
   disconnectSocket: () => {
     if (get().socket?.connected) get().socket.disconnect();
+  },
+  setShowOtpInput: (value) => {
+    set({ showOtpInput: value });
   },
 }));

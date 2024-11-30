@@ -9,6 +9,7 @@ import currentUser from "./routes/currentUser.routes.js";
 import messages from "./routes/messages.routes.js";
 import cookieParser from "cookie-parser";
 import { app, server } from "./lib/socket.js";
+import Message from "./models/message.model.js";
 
 dotenv.config();
 
@@ -29,6 +30,15 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userOperation);
 app.use("/api/currentUser", currentUser);
 app.use("/api/message", messages);
+
+// app.get("/deleteAllMessages", async(req,res)=>{
+//   try {
+//     await Message.deleteMany({});
+//     console.log('All records deleted successfully.');
+//   } catch (error) {
+//     console.error('Error deleting records:', error);
+//   }
+// })
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));

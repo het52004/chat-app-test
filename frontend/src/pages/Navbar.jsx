@@ -31,12 +31,12 @@ function Navbar() {
                 <div className="size-9 rounded-lg bg-primary/10 flex items-center justify-center">
                   <MessageSquare className="w-5 h-5 text-primary" />
                 </div>
-                <h1 className="text-lg font-bold">LetsChat</h1>
+                <h1 className="text-[18px] xs:text-lg font-bold">LetsChat</h1>
               </Link>
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="hidden xs:flex items-center gap-2">
             <Link
               to={"/settings"}
               className={`
@@ -61,6 +61,44 @@ function Navbar() {
                 </button>
               </>
             )}
+          </div>
+          <div className="xs:hidden dropdown dropdown-end">
+            <div tabIndex={0} role="button" className="btn m-1">
+              More
+            </div>
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow gap-3"
+            >
+              <li>
+                <Link
+                  to={"/settings"}
+                  className={`
+              btn btn-sm gap-2 transition-colors
+              
+              `}
+                >
+                  <Settings className="w-4 h-4" />
+                  <span className="">Settings</span>
+                </Link>
+              </li>
+              {userData && (
+                <li>
+                  <Link to={"/profile"} className={`btn btn-sm gap-2`}>
+                    <User className="size-5" />
+                    <span className="">Profile</span>
+                  </Link>
+                </li>
+              )}
+              {userData && (
+                <li>
+                  <button className="btn btn-sm gap-2" onClick={logout}>
+                    <LogOut className="size-5" />
+                    <span className="">Logout</span>
+                  </button>
+                </li>
+              )}
+            </ul>
           </div>
         </div>
       </div>
