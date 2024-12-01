@@ -3,6 +3,8 @@ import { generateToken } from "../helpers/generateToken.js";
 import bcrypt from "bcryptjs";
 import { sendEmail } from "../helpers/emailUtils.js";
 import TempUser from "../models/tempUser.model.js";
+import { deleteFile } from "../helpers/deleteFile.js";
+import { uploadOnCloudinary } from "../lib/cloudinary.js";
 
 const generateOTP = () =>
   Math.floor(100000 + Math.random() * 900000).toString();
@@ -11,7 +13,9 @@ export const checkSentOtp = async () => {};
 
 export const verifyUser = async (req, res) => {
   const { userName, uniqueName, email, password } = req.body;
+  const { filename, path, size } = req.file;
   if (!userName || !uniqueName || !email || !password) {
+    deleteFile(path);
     return res.json({
       success: false,
       message: "Please fill all the details!",
@@ -21,11 +25,13 @@ export const verifyUser = async (req, res) => {
     const existingUser = await User.findOne({ email });
     const uniqueNameExists = await User.findOne({ uniqueName });
     if (uniqueNameExists) {
+      deleteFile(path);
       res.json({
         success: false,
         message: "A user with this unique name already exists!",
       });
     } else if (existingUser) {
+      deleteFile(path);
       res.json({
         success: false,
         message: "A user with this email address already exists!",
@@ -38,28 +44,33 @@ export const verifyUser = async (req, res) => {
           message: `We have already send you OTP on your email ${email} please recheck`,
         });
       }
-      const otp = generateOTP();
-      await sendEmail(userName, email, otp, res);
-      const newUser = TempUser.create({
-        userName,
-        uniqueName,
-        email,
-        password,
-        otp,
-      });
-      if (!newUser) {
-        return res.json({
-          success: false,
-          message: "Failed to signup please try again!",
-        });
-      }
-      res.json({
-        success: true,
-        message: `An OTP has been sent to ${email}`,
-        email,
+    }
+    const otp = generateOTP();
+    await sendEmail(userName, email, otp, res);
+    const newUser = TempUser.create({
+      userName,
+      uniqueName,
+      email,
+      password,
+      otp,
+      photoName: filename,
+      photoPath: path,
+      photoSize: size,
+    });
+    if (!newUser) {
+      deleteFile(path);
+      return res.json({
+        success: false,
+        message: "Failed to signup please try again!",
       });
     }
+    res.json({
+      success: true,
+      message: `An OTP has been sent to ${email}`,
+      email,
+    });
   } catch (error) {
+    deleteFile(path);
     res.json({
       success: false,
       message: error.message,
@@ -79,14 +90,18 @@ export const signup = async (req, res) => {
     if (temp.otp !== otp)
       return res.json({ success: false, message: "Invalid OTP!" });
     const hashedPassword = await bcrypt.hash(temp.password, 10);
+    const resp = await uploadOnCloudinary(temp.photoPath);
     const createdUser = await User.create({
       userName: temp.userName,
       uniqueName: temp.uniqueName,
       email: temp.email,
       password: hashedPassword,
+      photoName: temp.photoName,
+      photoPath: resp.secure_url,
+      photoSize: resp.bytes,
     });
-    await temp.deleteOne({ email });
     if (createdUser) {
+      await temp.deleteOne({ email });
       generateToken(createdUser, res);
       res.json({
         success: true,
@@ -97,6 +112,8 @@ export const signup = async (req, res) => {
       res.json({ success: false, message: "Failed to create a new user!" });
     }
   } catch (error) {
+    console.log(error.message);
+
     if (error.name === "ValidationError") {
       return res.json({
         success: false,

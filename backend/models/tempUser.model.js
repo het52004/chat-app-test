@@ -28,6 +28,18 @@ const tempUserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    photoName: {
+      type: String,
+      default: null,
+    },
+    photoPath: {
+      type: String,
+      default: null,
+    },
+    photoSize: {
+      type: String,
+      default: null,
+    },
     expireAt: {
       type: Date,
       default: () => Date.now() + 5 * 60 * 1000,

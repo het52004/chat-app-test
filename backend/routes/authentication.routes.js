@@ -7,10 +7,15 @@ import {
   verifyUser,
 } from "../controllers/authentication.controller.js";
 import protectedRoute from "../middlewares/protectedRoute.js";
+import userImage from "../lib/multerConfig.js";
 
 const app = express();
 
-app.post("/verifyUser", verifyUser);
+app.post(
+  "/verifyUser",
+  userImage.single("avatar"),
+  verifyUser
+);
 app.post("/signup", signup);
 app.post("/login", login);
 app.get("/logout", logout);

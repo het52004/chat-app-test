@@ -58,19 +58,24 @@ const Sidebar = () => {
                 : ""
             }`}
           >
-            <div className="text-left">
-              <div className="font-medium truncate">{user.uniqueName}</div>
-              <div className="text-sm text-zinc-400">
-                {onlineUsers.includes(user._id) ? "Online" : "Offline"}
+            <div className="avatar flex items-center justify-center">
+              <div className="w-[60px] h-[60px] xs:w-[76px] xs:h-[74px] rounded-full">
+                <img src={`${user?.photoPath}`}/>
               </div>
             </div>
             <div className="relative mx-auto">
               {onlineUsers.includes(user._id) && (
                 <span
-                  className="absolute bottom-0 right-0 size-3 bg-green-500 
+                  className="absolute bottom-[-25px] right-[60px] size-3 bg-green-500 
               rounded-full ring-2 ring-zinc-900"
                 />
               )}
+            </div>
+            <div className="text-left">
+              <div className="font-medium truncate">{user.uniqueName}</div>
+              <div className="text-sm text-zinc-400">
+                {onlineUsers.includes(user._id) ? "Online" : "Offline"}
+              </div>
             </div>
           </button>
         ))}

@@ -24,6 +24,18 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    photoName: {
+      type: String,
+      default: null,
+    },
+    photoPath: {
+      type: String,
+      default: null,
+    },
+    photoSize: {
+      type: String,
+      default: null,
+    },
     incomingFriendRequests: [
       { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     ],

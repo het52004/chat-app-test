@@ -10,6 +10,7 @@ import { privateRoutes } from "./lib/privateRoutes";
 import Navbar from "./pages/Navbar";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
+import AddNewFriends from "./pages/AddNewFriends";
 
 function App() {
   const { userData, checkAuth, isCheckingAuth } = useAuthStore();
@@ -53,6 +54,10 @@ function App() {
         <Route
           path="/profile"
           element={userData ? <Profile /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/addnewfriends"
+          element={userData ? <AddNewFriends /> : <Navigate to="/" />}
         />
       </Routes>
       <Toaster />

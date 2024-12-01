@@ -34,15 +34,18 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  signup: async ({ userName, uniqueName, email, password }) => {
+  signup: async ({ userName, uniqueName, email, password, avatar }) => {
     set({ isSigningUp: true });
     try {
-      const res = await axiosInstance.post("/api/auth/verifyUser", {
-        userName,
-        uniqueName,
-        email,
-        password,
-      });
+      const res = await axiosInstance.post(
+        "/api/auth/verifyUser",
+        { userName, uniqueName, email, password, avatar },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       if (res.data.success) {
         localStorage.setItem("email", res.data.email);
         set({ showOtpInput: true });
@@ -60,6 +63,7 @@ export const useAuthStore = create((set, get) => ({
   verifyOtp: async (otp) => {
     if (otp.length === 6) {
       const email = localStorage.getItem("email");
+      console.log(email);
       set({ isSigningUp: true });
       try {
         const res = await axiosInstance.post("/api/auth/signup", {

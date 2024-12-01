@@ -1,5 +1,11 @@
 import React from "react";
-import { LogOut, MessageSquare, Settings, User } from "lucide-react";
+import {
+  LogOut,
+  MessageSquare,
+  Settings,
+  User,
+  UserRoundPlus,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 
@@ -50,6 +56,10 @@ function Navbar() {
 
             {userData && (
               <>
+                <Link to={"/addnewfriends"} className={`btn btn-sm gap-2`}>
+                  <UserRoundPlus className="size-5" />
+                  <span className="hidden sm:inline">Add new friends</span>
+                </Link>
                 <Link to={"/profile"} className={`btn btn-sm gap-2`}>
                   <User className="size-5" />
                   <span className="hidden sm:inline">Profile</span>
@@ -82,6 +92,14 @@ function Navbar() {
                   <span className="">Settings</span>
                 </Link>
               </li>
+              {userData && (
+                <li>
+                  <Link to={"/addnewfriends"} className={`btn btn-sm gap-2`}>
+                    <User className="size-5" />
+                    <span className="">Add new friends</span>
+                  </Link>
+                </li>
+              )}
               {userData && (
                 <li>
                   <Link to={"/profile"} className={`btn btn-sm gap-2`}>
