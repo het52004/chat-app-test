@@ -15,7 +15,6 @@ export const verifyUser = async (req, res) => {
   const { userName, uniqueName, email, password } = req.body;
   const { filename, path, size } = req.file;
   if (!userName || !uniqueName || !email || !password) {
-    deleteFile(path);
     return res.json({
       success: false,
       message: "Please fill all the details!",
@@ -25,13 +24,11 @@ export const verifyUser = async (req, res) => {
     const existingUser = await User.findOne({ email });
     const uniqueNameExists = await User.findOne({ uniqueName });
     if (uniqueNameExists) {
-      deleteFile(path);
       res.json({
         success: false,
         message: "A user with this unique name already exists!",
       });
     } else if (existingUser) {
-      deleteFile(path);
       res.json({
         success: false,
         message: "A user with this email address already exists!",
@@ -43,34 +40,33 @@ export const verifyUser = async (req, res) => {
           success: false,
           message: `We have already send you OTP on your email ${email} please recheck`,
         });
+      } else {
+        const otp = generateOTP();
+        await sendEmail(userName, email, otp, res);
+        const newUser = TempUser.create({
+          userName,
+          uniqueName,
+          email,
+          password,
+          otp,
+          photoName: filename,
+          photoPath: path,
+          photoSize: size,
+        });
+        if (!newUser) {
+          return res.json({
+            success: false,
+            message: "Failed to signup please try again!",
+          });
+        }
+        res.json({
+          success: true,
+          message: `An OTP has been sent to ${email}`,
+          email,
+        });
       }
     }
-    const otp = generateOTP();
-    await sendEmail(userName, email, otp, res);
-    const newUser = TempUser.create({
-      userName,
-      uniqueName,
-      email,
-      password,
-      otp,
-      photoName: filename,
-      photoPath: path,
-      photoSize: size,
-    });
-    if (!newUser) {
-      deleteFile(path);
-      return res.json({
-        success: false,
-        message: "Failed to signup please try again!",
-      });
-    }
-    res.json({
-      success: true,
-      message: `An OTP has been sent to ${email}`,
-      email,
-    });
   } catch (error) {
-    deleteFile(path);
     res.json({
       success: false,
       message: error.message,
@@ -86,7 +82,7 @@ export const signup = async (req, res) => {
   try {
     const temp = await TempUser.findOne({ email });
     if (!temp)
-      return res.json({ success: false, message: "OTP expired or invalid" });
+      return res.json({ success: false, message: "OTP expired or invalid! Try signingup again" });
     if (temp.otp !== otp)
       return res.json({ success: false, message: "Invalid OTP!" });
     const hashedPassword = await bcrypt.hash(temp.password, 10);
