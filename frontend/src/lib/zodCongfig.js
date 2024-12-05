@@ -32,10 +32,39 @@ export const schema = z.object({
     })
     .min(3, "User name must be at least 3 characters long")
     .max(10, "User name must not be more than 10 characters long")
-    .regex(/^[a-zA-Z0-9]+$/, "User name must only contain letters and numbers"),
+    .regex(/^[a-zA-Z0-9\s]+$/, "User name must only contain letters and numbers"),
 });
 
 export const loginSchema = schema.pick({
   uniqueName: true,
   password: true,
+});
+
+export const editSchema = z.object({
+  userName: z
+    .string({
+      required_error: "User name cannot be empty",
+    })
+    .min(3, { message: "UserName cannot be blank" })
+    .max(10, { message: "UserName cannot exceed 50 characters" })
+    .regex(
+      /^[a-zA-Z0-9\s]+$/,
+      "User name must only contain letters and numbers"
+    ),
+  uniqueName: z
+    .string({
+      required_error: "Unqiue name cannot be empty",
+    })
+    .min(3, { message: "UniqueName cannot be blank" })
+    .max(10, { message: "UniqueName cannot exceed 50 characters" })
+    .regex(
+      /^[a-zA-Z0-9]+$/,
+      "Unique name must only contain letters and numbers"
+    ),
+  password: z
+    .string({
+      required_error: "password cannot be empty",
+    })
+    .min(3, "Password must be at least 3 characters long")
+    .max(10, "Password must not be more than 10 characters long")
 });

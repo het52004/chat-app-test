@@ -7,7 +7,7 @@ const generateToken = (user, res) => {
     id: user._id,
     uniqueName: user.uniqueName,
   };
-  const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
+  const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1d" });
   res.cookie("jwt", token, {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,

@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import User from "../models/user.model.js";
 
 const protectedRoute = async (req, res, next) => {
   const token = req.cookies.jwt;
@@ -10,9 +11,16 @@ const protectedRoute = async (req, res, next) => {
   }
   try {
     const verifiedToken = jwt.verify(token, process.env.JWT_SECRET);
-    if (verifiedToken) {
-      req.userId = verifiedToken.id;
-      next();
+    if (!verifiedToken) {
+      res.json({ success: false, message: "Token invalid, login again!" });
+    } else {
+      const user = await User.findById(verifiedToken?.id);
+      if (!user) {
+        res.json({ success: false, message: "User not found!" });
+      } else {
+        req.user = user;
+        next();
+      }
     }
   } catch (error) {
     return res.json({

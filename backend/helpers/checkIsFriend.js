@@ -11,7 +11,6 @@ async function checkIsFriend(uid, fid, status) {
     const userProfile = await User.findById(uid);
     const friendProfile = await User.findById(fid);
     if (!userProfile) {
-      res.clearCookie("jwt");
       return res.json({
         success: false,
         message:
@@ -19,7 +18,6 @@ async function checkIsFriend(uid, fid, status) {
       });
     }
     if (!friendProfile) {
-      res.clearCookie("jwt");
       return res.json({
         success: false,
         message:

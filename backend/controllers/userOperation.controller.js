@@ -1,9 +1,10 @@
 import checkIsFriend from "../helpers/checkIsFriend.js";
 import { generateToken } from "../helpers/generateToken.js";
 import User from "../models/user.model.js";
+import { getReceiverSocketId, io } from "../lib/socket.js";
 
 export const searchUser = async (req, res) => {
-  const { uniqueName } = req.body;
+  const uniqueName = req.body.id;
   if (uniqueName.length < 2) {
     return res.json({
       success: false,
@@ -18,7 +19,7 @@ export const searchUser = async (req, res) => {
     if (foundUsers.length === 0) {
       res.json({ success: false, message: "No users found!" });
     } else {
-      foundUsers.password = undefined;
+      // foundUsers.password = undefined;
       res.json({
         success: true,
         message: "User found",
@@ -34,7 +35,7 @@ export const searchUser = async (req, res) => {
 };
 
 export const sendFriendRequest = async (req, res) => {
-  const userId = req.userId;
+  const userId = req.user._id.toString();
   const friendUserId = req.params.friendUserId;
   const status = await checkIsFriend(userId, friendUserId, "sendFriendRequest");
   if (!status.success) {
@@ -51,13 +52,26 @@ export const sendFriendRequest = async (req, res) => {
         { $push: { incomingFriendRequests: userId } },
         { new: true }
       );
-      const token = generateToken(updatedUserProfile);
+      const userSocketId = getReceiverSocketId(userId);
+      const receiverSocketId = getReceiverSocketId(friendUserId);
+
+      if (userSocketId) {
+        io.to(userSocketId).emit("friendRequestSent", {
+          from: updatedUserProfile,
+          to: updatedFriendProfile,
+        });
+      }
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("friendRequestReceived", {
+          from: updatedUserProfile,
+          to: updatedFriendProfile,
+        });
+      }
       return res.json({
         success: true,
         userData: updatedUserProfile,
         friendData: updatedFriendProfile,
         message: `Friend request sent to user ${updatedFriendProfile.uniqueName} successfully!`,
-        accessToken: token,
       });
     } catch (error) {
       return res.json({
@@ -69,7 +83,7 @@ export const sendFriendRequest = async (req, res) => {
 };
 
 export const acceptFriendRequest = async (req, res) => {
-  const userId = req.userId;
+  const userId = req.user._id.toString();
   const friendUserId = req.params.friendUserId;
   const status = await checkIsFriend(
     userId,
@@ -97,12 +111,27 @@ export const acceptFriendRequest = async (req, res) => {
         },
         { new: true }
       );
-      const token = generateToken(updatedUserProfile);
+
+      const userSocketId = getReceiverSocketId(userId);
+      const receiverSocketId = getReceiverSocketId(friendUserId);
+
+      if (userSocketId) {
+        io.to(userSocketId).emit("updateAfterFriendRequestAccepted", {
+          by: updatedUserProfile,
+          of: updatedFriendProfile,
+        });
+      }
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("friendRequestAccepted", {
+          by: updatedUserProfile,
+          of: updatedFriendProfile,
+        });
+      }
+
       return res.json({
         success: true,
         userData: updatedUserProfile,
         message: `You are now friends with user ${updatedFriendProfile.uniqueName}!`,
-        accessToken: token,
       });
     } catch (error) {
       return res.json({
@@ -114,7 +143,7 @@ export const acceptFriendRequest = async (req, res) => {
 };
 
 export const removeFriend = async (req, res) => {
-  const userId = req.userId;
+  const userId = req.user._id.toString();
   const friendUserId = req.params.friendUserId;
   const status = await checkIsFriend(userId, friendUserId, "removeFriend");
   if (!status.success) {
@@ -136,12 +165,16 @@ export const removeFriend = async (req, res) => {
         },
         { new: true }
       );
-      const token = generateToken(updatedUserProfile);
+
+      io.emit("friendRemoved", {
+        userData: updatedUserProfile,
+        friendData: updatedFriendProfile,
+      });
+
       return res.json({
         success: true,
         userData: updatedUserProfile,
         message: `Removed ${updatedFriendProfile.uniqueName} from friend list!`,
-        accessToken: token,
       });
     } catch (error) {
       return res.json({
@@ -153,7 +186,7 @@ export const removeFriend = async (req, res) => {
 };
 
 export const rejectFriendRequest = async (req, res) => {
-  const userId = req.userId;
+  const userId = req.user._id.toString();
   const friendUserId = req.params.friendUserId;
   const status = await checkIsFriend(
     userId,
@@ -178,12 +211,26 @@ export const rejectFriendRequest = async (req, res) => {
         },
         { new: true }
       );
-      const token = generateToken(updatedUserProfile);
+
+      const userSocketId = getReceiverSocketId(userId);
+      const receiverSocketId = getReceiverSocketId(friendUserId);
+
+      if (userSocketId) {
+        io.to(userSocketId).emit("updateAfterFriendRequestRejected", {
+          by: updatedUserProfile,
+          of: updatedFriendProfile,
+        });
+      }
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("friendRequestRejected", {
+          by: updatedUserProfile,
+          of: updatedFriendProfile,
+        });
+      }
       return res.json({
         success: true,
         userData: updatedUserProfile,
         message: `Friend request of user ${updatedFriendProfile.uniqueName} has been rejected!`,
-        accessToken: token,
       });
     } catch (error) {
       return res.json({
@@ -195,7 +242,7 @@ export const rejectFriendRequest = async (req, res) => {
 };
 
 export const cancelFriendRequest = async (req, res) => {
-  const userId = req.userId;
+  const userId = req.user._id.toString();
   const friendUserId = req.params.friendUserId;
   const status = await checkIsFriend(
     userId,
@@ -221,15 +268,19 @@ export const cancelFriendRequest = async (req, res) => {
         },
         { new: true }
       );
-      const token = generateToken(updatedUserProfile);
+      io.emit("friendRequestCancelled", {
+        userData: updatedUserProfile,
+        friendData: updatedFriendProfile,
+      });
       return res.json({
         success: true,
         userData: updatedUserProfile,
         friendData: updatedFriendProfile,
         message: `Friend sent to user ${updatedFriendProfile.uniqueName} has been cancelled!`,
-        accessToken: token,
       });
     } catch (error) {
+      console.log(error.message);
+
       return res.json({
         success: false,
         message: "Failed to cancel friend request!",
@@ -253,12 +304,10 @@ export const blockUser = async (req, res) => {
         },
         { new: true }
       );
-      const token = generateToken(updatedUserProfile);
       return res.json({
         success: true,
         userData: updatedUserProfile,
         message: `User has been blocked successfully!`,
-        accessToken: token,
       });
     } catch (error) {
       return res.json({ success: false, message: "Failed to block user!" });
@@ -281,12 +330,10 @@ export const unblockUser = async (req, res) => {
         },
         { new: true }
       );
-      const token = generateToken(updatedUserProfile);
       return res.json({
         success: true,
         userData: updatedUserProfile,
         message: `User has been unblocked successfully!`,
-        accessToken: token,
       });
     } catch (error) {
       return res.json({ success: false, message: "Failed to unblock user!" });

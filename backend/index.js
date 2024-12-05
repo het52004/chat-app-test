@@ -13,7 +13,7 @@ import { app, server } from "./lib/socket.js";
 import Message from "./models/message.model.js";
 
 
-const port = process.env.PORT;
+const port = process.env.PORT || 4000;
 
 const __dirname = path.resolve();
 

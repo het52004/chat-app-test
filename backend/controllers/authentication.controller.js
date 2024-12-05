@@ -3,7 +3,6 @@ import { generateToken } from "../helpers/generateToken.js";
 import bcrypt from "bcryptjs";
 import { sendEmail } from "../helpers/emailUtils.js";
 import TempUser from "../models/tempUser.model.js";
-import { deleteFile } from "../helpers/deleteFile.js";
 import { uploadOnCloudinary } from "../lib/cloudinary.js";
 
 const generateOTP = () =>
@@ -82,7 +81,10 @@ export const signup = async (req, res) => {
   try {
     const temp = await TempUser.findOne({ email });
     if (!temp)
-      return res.json({ success: false, message: "OTP expired or invalid! Try signingup again" });
+      return res.json({
+        success: false,
+        message: "OTP expired or invalid! Try signingup again",
+      });
     if (temp.otp !== otp)
       return res.json({ success: false, message: "Invalid OTP!" });
     const hashedPassword = await bcrypt.hash(temp.password, 10);
@@ -177,11 +179,7 @@ export const logout = (req, res) => {
 
 export const checkAuth = async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
-    if (!user) {
-      return res.json({ sucess: false, message: "user not found!" });
-    }
-    res.status(200).json({ success: true, userData: user });
+    res.status(200).json({ success: true, userData: req.user });
   } catch (error) {
     return res.status(500).json({ message: "Internal Server Error" });
   }

@@ -1,6 +1,7 @@
 import { generateToken } from "../helpers/generateToken.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
+import { uploadOnCloudinary } from "../lib/cloudinary.js";
 
 export const getCurrentUserData = async (req, res) => {
   try {
@@ -24,91 +25,45 @@ export const getCurrentUserData = async (req, res) => {
 };
 
 export const updateCurrentUserDetails = async (req, res) => {
+  const user = req.user;
+  const { userName, uniqueName, password } = req.body;
+  const { filename, path, size } = req.file || {};
+
+  if (!userName || !uniqueName || !password) {
+    res.json({ success: false, message: "Please fill all the details!" });
+  }
   try {
-    const { userName, uniqueName, email, password } = req.body;
-    const userId = req.userId;
-    const user = await User.findById(userId).select("password");
-    if (!user) {
-      res.clearCookie("jwt");
-      return res.json({
-        success: false,
-        message: "Such user does not exist! Please login again",
-      });
+    const isPasswordCorrect = await bcrypt.compare(password, req.user.password);
+    if (!isPasswordCorrect) {
+      res.json({ success: false, message: "Please enter correct password!" });
     } else {
-      try {
-        const isPasswordCorrect = await bcrypt.compare(password, user.password);
-        if (!isPasswordCorrect) {
-          res.json({
-            success: false,
-            message:
-              "Enter correct password in order to update your account details!",
-          });
-        } else {
-          const otherUsersWithSameInfo = await User.find({
-            _id: { $ne: userId },
-            $or: [{ uniqueName: uniqueName }, { email: email }],
-          });
-          otherUsersWithSameInfo.forEach((user) => {
-            if (user.uniqueName === uniqueName) {
-              return res.json({
-                success: false,
-                message:
-                  "The uniqueName you entered already exists! try another uniqueName",
-              });
-            }
-            if (user.email === email) {
-              return res.json({
-                success: false,
-                message:
-                  "The email you entered already exists! try another email",
-              });
-            }
-          });
-          try {
-            const updatedUser = await User.findByIdAndUpdate(
-              userId,
-              {
-                userName,
-                uniqueName,
-                email,
-              },
-              { new: true }
-            );
-            const token = generateToken(updatedUser);
-            updatedUser.save();
-            return res.json({
-              success: true,
-              message:
-                "The user details has been updated successfully! Please login again",
-              userData: updatedUser,
-              accessToken: token,
-            });
-          } catch (error) {
-            return res.json({
-              success: false,
-              message: "An error occured while updating your profile!",
-            });
-          }
-        }
-      } catch (error) {
-        return res.json({
-          success: false,
-          message:
-            "An error has been occured while comparing your data please try again!",
-        });
+      user.userName = userName;
+      user.uniqueName = uniqueName;
+      if (req.file) {
+        const resp = await uploadOnCloudinary(path);
+        user.photoPath = resp.secure_url;
+        user.photoSize = resp.bytes;
+        user.photoName = filename;
       }
+      await user.save();
+      generateToken(user, res);
+      res.json({
+        success: true,
+        message: "Profile has been updated successfully!",
+        userData: user,
+      });
     }
   } catch (error) {
-    return res.json({
+    res.json({
       success: false,
       message:
-        "An error has been occured while updating your data please try again!",
+        "An error had been occured while updating your details, please try again!",
     });
   }
 };
 
 export const deleteCurrentUser = async (req, res) => {
-  const userId = req.userId;
+  const userId = req.user._id.toString();
   try {
     const deletedUser = await User.findByIdAndDelete(userId);
     if (!deletedUser) {

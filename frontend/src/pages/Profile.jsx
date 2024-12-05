@@ -17,7 +17,7 @@ function Profile() {
         <div className="flex items-center justify-end h-10">
           <div className="flex">
             <Link to="/home" className="flex items-center hover:underline">
-              <House size={30}/>
+              <House size={30} />
               <span className="hidden xs:block">Go Back to home</span>
             </Link>
           </div>
@@ -49,22 +49,26 @@ function Profile() {
             ) : (
               <span className="loading loading-spinner loading-md"></span>
             )}
-            <button
-              className="btn bg-blue-500 xs:h-[40px] xs:w-[200px]"
-              disabled={disableButtons}
-            >
-              <span className="hidden xs:inline">Edit Account Details</span>
-              <Pencil className="cursor-pointer" />
-            </button>
+            <Link to="/editaccount">
+              <button
+                className="btn bg-blue-500 xs:h-[40px] xs:w-[200px]"
+                disabled={disableButtons}
+              >
+                <span className="hidden xs:inline">Edit Account Details</span>
+                <Pencil className="cursor-pointer" />
+              </button>
+            </Link>
           </div>
           <div className="flex items-center justify-center gap-4">
-            <button
-              className="btn btn-primary xs:h-[40px] xs:w-[200px]"
-              disabled={disableButtons}
-            >
-              <span className="hidden xs:inline">Friends</span>
-              <Users className="cursor-pointer" />
-            </button>
+            <Link to="/friends">
+              <button
+                className="btn btn-primary xs:h-[40px] xs:w-[200px]"
+                disabled={disableButtons}
+              >
+                <span className="hidden xs:inline">Friends</span>
+                <Users className="cursor-pointer" />
+              </button>
+            </Link>
             <button
               className="btn btn-primary xs:h-[40px] xs:w-[200px]"
               disabled={disableButtons}

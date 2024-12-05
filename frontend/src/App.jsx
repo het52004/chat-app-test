@@ -1,4 +1,4 @@
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
@@ -11,16 +11,30 @@ import Navbar from "./pages/Navbar";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import AddNewFriends from "./pages/AddNewFriends";
+import EditAccount from "./pages/EditAccount";
+import ViewUserProfile from "./pages/ViewUserProfile";
+import Friends from "./pages/Friends";
+import { useFriendRequest } from "./store/useFriendRequest";
+import IncomingRequests from "./pages/IncomingRequests";
 
 function App() {
   const { userData, checkAuth, isCheckingAuth } = useAuthStore();
   const { theme } = useThemeStore();
+  const { checkStatus, removeStatus } = useFriendRequest();
   const location = useLocation();
   useEffect(() => {
     if (privateRoutes.includes(location.pathname)) {
       checkAuth();
     }
   }, [checkAuth, location]);
+  useEffect(() => {
+    if (userData) {
+      checkStatus();
+      return () => {
+        removeStatus();
+      };
+    }
+  }, [userData]);
   if (isCheckingAuth && !userData) {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100">
@@ -58,6 +72,22 @@ function App() {
         <Route
           path="/addnewfriends"
           element={userData ? <AddNewFriends /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/editaccount"
+          element={userData ? <EditAccount /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/viewuserprofile"
+          element={userData ? <ViewUserProfile /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/friends"
+          element={userData ? <Friends /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/incoming"
+          element={userData ? <IncomingRequests /> : <Navigate to="/" />}
         />
       </Routes>
       <Toaster />

@@ -3,11 +3,18 @@ import User from "../models/user.model.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
 
 export const sendMessage = async (req, res) => {
-  const userId = req.userId;
+  const user = req.user;
   const { receiverId, message } = req.body;
+
+  if (user._id.toString() === receiverId) {
+    res.json({ success: false, message: "You cannot message yourself!" });
+  }
+  if (!message || message.length < 1) {
+    res.json({ success: false, message: "Messages cannot be blank!" });
+  }
   try {
     const messageRes = await Message.create({
-      senderId: userId,
+      senderId: user._id.toString(),
       receiverId,
       content: message,
     });
@@ -37,7 +44,7 @@ export const sendMessage = async (req, res) => {
 };
 
 export const getMessages = async (req, res) => {
-  const senderId = req.userId;
+  const senderId = req.user._id.toString();
   const receiverId = req.params.receiverId;
   try {
     const messages = await Message.find({
@@ -58,7 +65,7 @@ export const getMessages = async (req, res) => {
 
 export const getUsersForSidebar = async (req, res) => {
   try {
-    const loggedInUserId = req.userId;
+    const loggedInUserId = req.user._id.toString();
     const filteredUsers = await User.find({
       _id: { $ne: loggedInUserId },
     }).select("-password");
