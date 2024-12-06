@@ -268,10 +268,21 @@ export const cancelFriendRequest = async (req, res) => {
         },
         { new: true }
       );
-      io.emit("friendRequestCancelled", {
-        userData: updatedUserProfile,
-        friendData: updatedFriendProfile,
-      });
+      const userSocketId = getReceiverSocketId(userId);
+      const receiverSocketId = getReceiverSocketId(friendUserId);
+
+      if (userSocketId) {
+        io.to(userSocketId).emit("updateAfterFriendRequestCancelled", {
+          by: updatedUserProfile,
+          of: updatedFriendProfile,
+        });
+      }
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("friendRequestCancelled", {
+          by: updatedUserProfile,
+          of: updatedFriendProfile,
+        });
+      }
       return res.json({
         success: true,
         userData: updatedUserProfile,

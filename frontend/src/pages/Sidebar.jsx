@@ -47,7 +47,7 @@ const Sidebar = () => {
             <span className="text-sm">Show online only</span>
           </label>
           <span className="text-xs text-zinc-500">
-            ({onlineFriends.length > 0 ? onlineFriends.length - 1 : 0} online)
+            ({onlineFriends.length} online)
           </span>
         </div>
       </div>

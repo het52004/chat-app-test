@@ -232,31 +232,31 @@ export const useFriendRequest = create((set, get) => ({
           isBlocked: by.blockedUsers.includes(of._id),
         });
       });
-      socket.on("friendRequestCancelled", ({ userData, friendData }) => {
-        console.log(useAuthStore.getState().userData);
-        console.log(useUserStore.getState().viewUserProfileData);
-        console.log(userData);
-        console.log(friendData);
-
-        if (
-          userData._id === useAuthStore.getState().userData._id ||
-          userData._id === useUserStore.getState().viewUserProfileData._id
-        ) {
-          set({ isFriend: userData.friends.includes(friendData._id) });
+      socket.on("friendRequestCancelled", ({ by, of }) => {
+        if (useUserStore.getState().viewUserProfileData._id === by._id) {
+          set({ isFriend: of.friends.includes(by._id) });
           set({
-            isIncoming: userData.incomingFriendRequests.includes(
-              friendData._id
-            ),
+            isIncoming: of.incomingFriendRequests.includes(by._id),
           });
           set({
-            isOutgoing: userData.outgoingFriendRequests.includes(
-              friendData._id
-            ),
+            isOutgoing: of.outgoingFriendRequests.includes(by._id),
           });
           set({
-            isBlocked: userData.blockedUsers.includes(friendData._id),
+            isBlocked: of.blockedUsers.includes(by._id),
           });
         }
+      });
+      socket.on("updateAfterFriendRequestCancelled", ({ by, of }) => {
+        set({ isFriend: by.friends.includes(of._id) });
+        set({
+          isIncoming: by.incomingFriendRequests.includes(of._id),
+        });
+        set({
+          isOutgoing: by.outgoingFriendRequests.includes(of._id),
+        });
+        set({
+          isBlocked: by.blockedUsers.includes(of._id),
+        });
       });
     } catch (error) {
       toast.error(error.message);
@@ -276,5 +276,6 @@ export const useFriendRequest = create((set, get) => ({
     socket.off("friendRequestAccepted");
     socket.off("updateAfterFriendRequestAccepted");
     socket.off("updateAfterFriendRequestRejected");
+    socket.off("updateAfterFriendRequestCancelled");
   },
 }));
