@@ -148,27 +148,39 @@ export const useFriendRequest = create((set, get) => ({
 
       socket.on("friendRequestReceived", ({ from, to }) => {
         toast.success(`Friend request received from ${from.uniqueName}`);
-        set({ isFriend: to.friends.includes(from._id) });
-        set({
-          isIncoming: to.incomingFriendRequests.includes(from._id),
-        });
-        set({
-          isOutgoing: to.outgoingFriendRequests.includes(from._id),
-        });
-        set({ isBlocked: to.blockedUsers.includes(from._id) });
+
+        if (from._id === useUserStore.getState().viewUserProfileData._id) {
+          set({ isFriend: to.friends.includes(from._id) });
+          set({
+            isIncoming: to.incomingFriendRequests.includes(from._id),
+          });
+          set({
+            isOutgoing: to.outgoingFriendRequests.includes(from._id),
+          });
+          set({ isBlocked: to.blockedUsers.includes(from._id) });
+        }
       });
 
       socket.on("friendRemoved", ({ userData, friendData }) => {
-        set({ isFriend: userData.friends.includes(friendData._id) });
-        set({
-          isIncoming: userData.incomingFriendRequests.includes(friendData._id),
-        });
-        set({
-          isOutgoing: userData.outgoingFriendRequests.includes(friendData._id),
-        });
-        set({
-          isBlocked: userData.blockedUsers.includes(friendData._id),
-        });
+        if (
+          friendData._id === useUserStore.getState().viewUserProfileData._id ||
+          userData._id === useUserStore.getState().viewUserProfileData._id
+        ) {
+          set({ isFriend: userData.friends.includes(friendData._id) });
+          set({
+            isIncoming: userData.incomingFriendRequests.includes(
+              friendData._id
+            ),
+          });
+          set({
+            isOutgoing: userData.outgoingFriendRequests.includes(
+              friendData._id
+            ),
+          });
+          set({
+            isBlocked: userData.blockedUsers.includes(friendData._id),
+          });
+        }
       });
       socket.on("friendRequestAccepted", ({ by, of }) => {
         toast.success(`Your Friend has been accepted by ${by.uniqueName}`);
@@ -221,16 +233,30 @@ export const useFriendRequest = create((set, get) => ({
         });
       });
       socket.on("friendRequestCancelled", ({ userData, friendData }) => {
-        set({ isFriend: userData.friends.includes(friendData._id) });
-        set({
-          isIncoming: userData.incomingFriendRequests.includes(friendData._id),
-        });
-        set({
-          isOutgoing: userData.outgoingFriendRequests.includes(friendData._id),
-        });
-        set({
-          isBlocked: userData.blockedUsers.includes(friendData._id),
-        });
+        console.log(useAuthStore.getState().userData);
+        console.log(useUserStore.getState().viewUserProfileData);
+        console.log(userData);
+        console.log(friendData);
+
+        if (
+          userData._id === useAuthStore.getState().userData._id ||
+          userData._id === useUserStore.getState().viewUserProfileData._id
+        ) {
+          set({ isFriend: userData.friends.includes(friendData._id) });
+          set({
+            isIncoming: userData.incomingFriendRequests.includes(
+              friendData._id
+            ),
+          });
+          set({
+            isOutgoing: userData.outgoingFriendRequests.includes(
+              friendData._id
+            ),
+          });
+          set({
+            isBlocked: userData.blockedUsers.includes(friendData._id),
+          });
+        }
       });
     } catch (error) {
       toast.error(error.message);

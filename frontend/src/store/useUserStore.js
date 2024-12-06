@@ -121,6 +121,7 @@ export const useUserStore = create((set, get) => ({
   },
   getIncomingRequests: async () => {
     set({ isFetchingUserData: true });
+    set({ incomingFriends: [] });
     try {
       const res = await axiosInstance.get(
         "/api/user/getIncomingFriendRequestUserData"
@@ -144,7 +145,7 @@ export const useUserStore = create((set, get) => ({
     if (!socket) return;
 
     socket.on("friendRequestReceived", ({ from, to }) => {
-      console.log("here",from);
+      console.log("here", from);
       set((state) => ({
         incomingFriends: [...state.incomingFriends, from],
       }));
