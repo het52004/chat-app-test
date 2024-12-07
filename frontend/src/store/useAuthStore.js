@@ -35,28 +35,32 @@ export const useAuthStore = create((set, get) => ({
   },
 
   signup: async ({ userName, uniqueName, email, password, avatar }) => {
-    set({ isSigningUp: true });
-    try {
-      const res = await axiosInstance.post(
-        "/api/auth/verifyUser",
-        { userName, uniqueName, email, password, avatar },
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+    if (!avatar) {
+      toast.error("select a profile picture");
+    } else {
+      set({ isSigningUp: true });
+      try {
+        const res = await axiosInstance.post(
+          "/api/auth/verifyUser",
+          { userName, uniqueName, email, password, avatar },
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        if (res.data.success) {
+          localStorage.setItem("email", res.data.email);
+          set({ showOtpInput: true });
+          toast.success(res.data.message);
+        } else {
+          toast.error(res.data.message);
         }
-      );
-      if (res.data.success) {
-        localStorage.setItem("email", res.data.email);
-        set({ showOtpInput: true });
-        toast.success(res.data.message);
-      } else {
-        toast.error(res.data.message);
+      } catch (error) {
+        toast.error(error.message);
+      } finally {
+        set({ isSigningUp: false });
       }
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      set({ isSigningUp: false });
     }
   },
 
@@ -130,8 +134,8 @@ export const useAuthStore = create((set, get) => ({
     set({ socket: socket });
 
     socket.on("getOnlineFriends", (userIds) => {
-      console.log("here",userIds);
-      
+      console.log("here", userIds);
+
       set({ onlineUsers: userIds });
     });
   },
