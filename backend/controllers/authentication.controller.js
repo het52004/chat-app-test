@@ -12,30 +12,36 @@ export const checkSentOtp = async () => {};
 
 export const verifyUser = async (req, res) => {
   const { userName, uniqueName, email, password } = req.body;
-  const { filename, path, size } = req.file;
   if (!userName || !uniqueName || !email || !password) {
     return res.json({
       success: false,
       message: "Please fill all the details!",
     });
   }
+  if (!req.file) {
+    return res.json({
+      success: false,
+      message: "Some error occured while uploading your profile picture!",
+    });
+  }
+  const { filename, path, size } = req.file;
   try {
     const existingUser = await User.findOne({ email });
     const uniqueNameExists = await User.findOne({ uniqueName });
     if (uniqueNameExists) {
-      res.json({
+      return res.json({
         success: false,
         message: "A user with this unique name already exists!",
       });
     } else if (existingUser) {
-      res.json({
+      return res.json({
         success: false,
         message: "A user with this email address already exists!",
       });
     } else {
       const existingTempUser = await TempUser.findOne({ email });
       if (existingTempUser) {
-        res.json({
+        return res.json({
           success: false,
           message: `We have already send you OTP on your email ${email} please recheck`,
         });
@@ -58,7 +64,7 @@ export const verifyUser = async (req, res) => {
             message: "Failed to signup please try again!",
           });
         }
-        res.json({
+        return res.json({
           success: true,
           message: `An OTP has been sent to ${email}`,
           email,
@@ -66,7 +72,7 @@ export const verifyUser = async (req, res) => {
       }
     }
   } catch (error) {
-    res.json({
+    return res.json({
       success: false,
       message: error.message,
     });
@@ -75,8 +81,8 @@ export const verifyUser = async (req, res) => {
 
 export const signup = async (req, res) => {
   const { email, otp } = req.body;
-  if (!email) {
-    res.json({ success: false, message: "Email not verified!" });
+  if (!email || !otp) {
+    return res.json({ success: false, message: "Email or otp not verified!" });
   }
   try {
     const temp = await TempUser.findOne({ email });
@@ -85,10 +91,15 @@ export const signup = async (req, res) => {
         success: false,
         message: "OTP expired or invalid! Try signingup again",
       });
-    if (temp.otp !== otp)
-      return res.json({ success: false, message: "Invalid OTP!" });
+    if (temp.otp !== otp) return res.json({ success: false, message: "Invalid OTP!" });
     const hashedPassword = await bcrypt.hash(temp.password, 10);
     const resp = await uploadOnCloudinary(temp.photoPath);
+    if (!resp) {
+      return res.json({
+        success: false,
+        message: "Failed to upload your image",
+      });
+    }
     const createdUser = await User.create({
       userName: temp.userName,
       uniqueName: temp.uniqueName,
@@ -100,18 +111,17 @@ export const signup = async (req, res) => {
     });
     if (createdUser) {
       await temp.deleteOne({ email });
+      createdUser.password = null;
       generateToken(createdUser, res);
-      res.json({
+      return res.json({
         success: true,
         message: "User has been registered successfully!",
         userData: createdUser,
       });
     } else {
-      res.json({ success: false, message: "Failed to create a new user!" });
+      return res.json({ success: false, message: "Failed to create a new user!" });
     }
   } catch (error) {
-    console.log(error.message);
-
     if (error.name === "ValidationError") {
       return res.json({
         success: false,
